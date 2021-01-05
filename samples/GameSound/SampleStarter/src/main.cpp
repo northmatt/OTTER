@@ -80,9 +80,6 @@ GLFWwindow* window;
 
 void GlfwWindowResizedCallback(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
-	Application::Instance().ActiveScene->Registry().view<Camera>().each([=](Camera & cam) {
-		cam.ResizeWindow(width, height);
-	});
 }
 
 bool initGLFW() {
@@ -96,7 +93,7 @@ bool initGLFW() {
 #endif
 	
 	//Create a new GLFW window
-	window = glfwCreateWindow(800, 800, "INFR1350U", nullptr, nullptr);
+	window = glfwCreateWindow(800, 800, "Starter Sample", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
 
 	// Set our window resized callback
