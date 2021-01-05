@@ -192,6 +192,14 @@ void RenderImGui() {
 	}
 }
 
+//---------------------------------------------------------------------------------
+// Inplemented in Game.cpp
+//---------------------------------------------------------------------------------
+extern void Init();
+extern void Update(float deltaTime);
+extern void Render();
+extern void Shutdown();
+
 int main() {
 	Logger::Init(); // We'll borrow the logger from the toolkit, but we need to initialize it
 
@@ -214,9 +222,13 @@ int main() {
 	// Enable texturing
 	glEnable(GL_TEXTURE_2D);
 
+
+
 	// Push another scope so most memory should be freed *before* we exit the app
 	{
-
+		
+		// Init Game
+		Init();
 
 		// We'll use a vector to store all our key press events for now (this should probably be a behaviour eventually)
 		std::vector<KeyPressWatcher> keyToggles;
@@ -253,19 +265,28 @@ int main() {
 				}
 			}
 
+			// Update Game
+			Update(time.DeltaTime);
+
+
 			// Clear the screen
 			glClearColor(0.08f, 0.17f, 0.31f, 1.0f);
 			glEnable(GL_DEPTH_TEST);
 			glClearDepth(1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		
+			
+			// Render Game
+			Render();
 
 			// Draw our ImGui content
 			RenderImGui();
 			glfwSwapBuffers(window);
 			time.LastFrame = time.CurrentFrame;
 		}
+
+		// Shut down game
+		Shutdown();
 
 		// Nullify scene so that we can release references
 		Application::Instance().ActiveScene = nullptr;
