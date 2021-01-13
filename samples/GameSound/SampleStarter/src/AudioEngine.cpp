@@ -1,10 +1,9 @@
-
 #include "AudioEngine.h"
 
 
 
 ////////////////////////////////////
-//			 Event				  //
+//			 AudioEvent			  //
 ////////////////////////////////////
 
 AudioEvent::AudioEvent(FMOD::Studio::EventInstance* eventInstance)
@@ -18,11 +17,6 @@ AudioEvent::~AudioEvent()
 
 void AudioEvent::Play()
 {
-
-	if (m_EventInstance == nullptr)
-	{
-		return;
-	}
 
 	// Check if already playing
 	FMOD_STUDIO_PLAYBACK_STATE* state = NULL;
@@ -77,6 +71,41 @@ bool AudioEvent::isPlaying()
 	return false;
 }
 
+void AudioEvent::SetParameter(const char* name, const float& value, const bool& ignoreSeekSpeed)
+{
+	ErrorCheck(m_EventInstance->setParameterByName(name, value, ignoreSeekSpeed));
+}
+
+float AudioEvent::GetParameterValue(const char* name)
+{
+	// Make float for output
+	float value;
+
+	// Put value into float
+	ErrorCheck(m_EventInstance->getParameterByName(name, &value));
+
+	// Return float
+	return value;
+}
+
+
+int AudioEvent::ErrorCheck(FMOD_RESULT result)
+{
+
+	// Outputs FMOD error message
+	if (result != FMOD_OK)
+	{
+		std::cout << "FMOD EVENT ERROR: " << FMOD_ErrorString(result) << std::endl;
+
+		__debugbreak();
+
+		return 1;
+	}
+
+	// All good
+	return 0;
+}
+
 
 ////////////////////////////////////
 //			 Audio Engine		  //
@@ -92,10 +121,10 @@ AudioEngine& AudioEngine::Instance()
 void AudioEngine::Init()
 {
 	// Initilizs the audio systems in FMOD
-
 	ErrorCheck(FMOD::Studio::System::create(&m_StudioSystem));
 	ErrorCheck(m_StudioSystem->initialize(32, FMOD_STUDIO_INIT_LIVEUPDATE, FMOD_INIT_PROFILE_ENABLE, NULL));
 
+	// Save ref to core system
 	ErrorCheck(m_StudioSystem->getCoreSystem(&m_System));
 }
 
@@ -105,7 +134,6 @@ void AudioEngine::Update()
 	ErrorCheck(m_StudioSystem->update());
 
 }
-
 
 void AudioEngine::Shutdown()
 {
@@ -157,9 +185,9 @@ AudioEvent* AudioEngine::CreateEvent(const std::string& eventName, const std::st
 		eventDescription->createInstance(&newFMODEvent);
 
 		// Create an audio event
-		AudioEvent* newAudioEvent = new AudioEvent(newFMODEvent); // TODO: Delete these in shutdown
+		AudioEvent* newAudioEvent = new AudioEvent(newFMODEvent);
 		
-		// Make sure multiples aren't created
+		// Make sure multiple events with the same name aren't created
 		if (m_EventMap.find(eventName) != m_EventMap.end())
 		{
 			__debugbreak();
@@ -217,7 +245,7 @@ int AudioEngine::ErrorCheck(FMOD_RESULT result)
 	// Outputs FMOD error message
 	if (result != FMOD_OK)
 	{
-		std::cout << "FMOD ERROR: " << FMOD_ErrorString(result) << std::endl;
+		std::cout << "FMOD ENGINE ERROR: " << FMOD_ErrorString(result) << std::endl;
 		
 		__debugbreak();
 

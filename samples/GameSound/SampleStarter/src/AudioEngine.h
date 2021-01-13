@@ -37,10 +37,19 @@ public:
 	// Checks if event is playing
 	bool isPlaying();
 
+	// Parameters
+	void SetParameter(const char* name, const float& value, const bool& ignoreSeekSpeed = false);
+	float GetParameterValue(const char* name);
+
+
 private:
 
 	// AudioEngine class uses this to create Event objects
 	AudioEvent(FMOD::Studio::EventInstance* eventInstance);
+
+	int ErrorCheck(FMOD_RESULT result);
+
+private:
 
 	FMOD::Studio::EventInstance* m_EventInstance;
 };
@@ -65,7 +74,7 @@ public:
 	void Update();
 	void Shutdown();
 
-	int ErrorCheck(FMOD_RESULT result);
+
 
 	//// Banks ////
 	void LoadBank(const std::string& strBankName, FMOD_STUDIO_LOAD_BANK_FLAGS flags = FMOD_STUDIO_LOAD_BANK_NORMAL);
@@ -84,6 +93,9 @@ private:
 
 	AudioEngine() {}
 
+	int ErrorCheck(FMOD_RESULT result);
+
+private:
 	FMOD::Studio::System* m_StudioSystem;
 	FMOD::System* m_System;
 

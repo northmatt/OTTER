@@ -24,6 +24,11 @@ void Init()
 	// Play the event
 	testEvent->Play();
 
+	// Parameter change
+	testEvent->SetParameter("Underwater", 1);
+
+
+
 }
 
 //------------------------------------------------------------------------
