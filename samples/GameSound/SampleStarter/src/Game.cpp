@@ -2,14 +2,28 @@
 // Game.cpp
 //------------------------------------------------------------------------
 
-int test = 0;
+#include "AudioEngine.h"
 
 //------------------------------------------------------------------------
 // Called before first update. Do any initial setup here.
 //------------------------------------------------------------------------
+
 void Init()
 {
-	test = 1;
+	AudioEngine& audio = AudioEngine::Instance();
+
+	// Init FMOD
+	audio.Init();
+
+	// Load the sound bank
+	audio.LoadBank("Master");
+
+	// Create an event instance
+	AudioEvent* testEvent = AudioEngine::Instance().CreateEvent("Mii Channel Theme", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}");
+
+	// Play the event
+	testEvent->Play();
+
 }
 
 //------------------------------------------------------------------------
@@ -18,10 +32,10 @@ void Init()
 //------------------------------------------------------------------------
 void Update(float deltaTime)
 {
-
-	test++;
+	// Update fmod
+	AudioEngine::Instance().Update();
+	
 }
-
 
 
 //------------------------------------------------------------------------
@@ -29,8 +43,6 @@ void Update(float deltaTime)
 //------------------------------------------------------------------------
 void Render()
 {
-
-
 
 }
 
@@ -40,5 +52,6 @@ void Render()
 //------------------------------------------------------------------------
 void Shutdown()
 {
+	AudioEngine::Instance().Shutdown();
 
 }
