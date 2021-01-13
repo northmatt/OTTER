@@ -109,6 +109,14 @@ void AudioEngine::Update()
 
 void AudioEngine::Shutdown()
 {
+
+	// Delete events
+	for (auto event : m_EventMap)
+	{
+		delete event.second;
+	}
+	m_EventMap.clear();
+
 	AudioEngine::ErrorCheck(m_StudioSystem->unloadAll());
 	AudioEngine::ErrorCheck(m_StudioSystem->release());
 }
@@ -150,6 +158,12 @@ AudioEvent* AudioEngine::CreateEvent(const std::string& eventName, const std::st
 
 		// Create an audio event
 		AudioEvent* newAudioEvent = new AudioEvent(newFMODEvent); // TODO: Delete these in shutdown
+		
+		// Make sure multiples aren't created
+		if (m_EventMap.find(eventName) != m_EventMap.end())
+		{
+			__debugbreak();
+		}
 
 		// Add the audio event to our map
 		m_EventMap[eventName] = newAudioEvent;
