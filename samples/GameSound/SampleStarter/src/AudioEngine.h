@@ -47,6 +47,9 @@ private:
 	// AudioEngine class uses this to create Event objects
 	AudioEvent(FMOD::Studio::EventInstance* eventInstance);
 
+	// Don't want copies, should only grab refs from audio engine
+	AudioEvent(AudioEvent const&) = delete;
+
 	int ErrorCheck(FMOD_RESULT result);
 
 private:
@@ -80,8 +83,12 @@ public:
 	void LoadBank(const std::string& strBankName, FMOD_STUDIO_LOAD_BANK_FLAGS flags = FMOD_STUDIO_LOAD_BANK_NORMAL);
 
 	//// Events ////
-	AudioEvent* CreateEvent(const std::string& strEventName, const std::string& strEventNumber);
-	AudioEvent* GetEvent(const std::string& strEventName);
+	AudioEvent& CreateEvent(const std::string& strEventName, const std::string& strEventNumber);
+	AudioEvent& GetEvent(const std::string& strEventName);
+
+	//// Global Parameters ////
+	void SetGlobalParameter(const char* name, const float& value, const bool& ignoreSeekSpeed = false);
+	float GetGlobalParameterValue(const char* name);
 
 	//// Helpers ////
 	float dbToVolume(float db);

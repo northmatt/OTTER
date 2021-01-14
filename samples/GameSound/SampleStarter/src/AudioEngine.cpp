@@ -171,7 +171,7 @@ void AudioEngine::LoadBank(const std::string& bankName, FMOD_STUDIO_LOAD_BANK_FL
 	}
 }
 
-AudioEvent* AudioEngine::CreateEvent(const std::string& eventName, const std::string& eventNumber)
+AudioEvent& AudioEngine::CreateEvent(const std::string& eventName, const std::string& eventNumber)
 {
 	// Get find event in file
 	FMOD::Studio::EventDescription* eventDescription = NULL;
@@ -182,7 +182,7 @@ AudioEvent* AudioEngine::CreateEvent(const std::string& eventName, const std::st
 	{
 		// Use the event description to make and return an instance
 		FMOD::Studio::EventInstance* newFMODEvent = nullptr;
-		eventDescription->createInstance(&newFMODEvent);
+		ErrorCheck(eventDescription->createInstance(&newFMODEvent));
 
 		// Create an audio event
 		AudioEvent* newAudioEvent = new AudioEvent(newFMODEvent);
@@ -196,24 +196,46 @@ AudioEvent* AudioEngine::CreateEvent(const std::string& eventName, const std::st
 		// Add the audio event to our map
 		m_EventMap[eventName] = newAudioEvent;
 
-		return newAudioEvent;
+		return *newAudioEvent;
 	}
-
-	return nullptr;
+	
 }
 
-AudioEvent* AudioEngine::GetEvent(const std::string& strEventName)
+AudioEvent& AudioEngine::GetEvent(const std::string& strEventName)
 {
 	// If the event exists
 	if (m_EventMap.find(strEventName) != m_EventMap.end())
 	{
 		// Return it
-		return m_EventMap.at(strEventName);
+		return *m_EventMap.at(strEventName);
+	}
+	else
+	{
+		// Event not found
+		__debugbreak;
 	}
 
-	// No event found
-	return nullptr;
 }
+
+/////// Global Parameters //////////
+
+void AudioEngine::SetGlobalParameter(const char* name, const float& value, const bool& ignoreSeekSpeed)
+{
+	ErrorCheck(m_StudioSystem->setParameterByName(name, value, ignoreSeekSpeed));
+}
+
+float AudioEngine::GetGlobalParameterValue(const char* name)
+{
+	// Make float for output
+	float value;
+
+	// Put value into float
+	ErrorCheck(m_StudioSystem->getParameterByName(name, &value));
+
+	// Return float
+	return value;
+}
+
 
 
 

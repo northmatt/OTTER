@@ -4,51 +4,72 @@
 
 #include "AudioEngine.h"
 
+float gameTime;
+
 //------------------------------------------------------------------------
 // Called before first update. Do any initial setup here.
 //------------------------------------------------------------------------
 
 void Init()
 {
-	AudioEngine& audio = AudioEngine::Instance();
+	gameTime = 0;
+
+	AudioEngine& audioEngine = AudioEngine::Instance();
 
 	// Init FMOD
-	audio.Init();
+	audioEngine.Init();
 
-	// Load the sound bank
-	audio.LoadBank("Master");
+	// Load a sound bank
+	audioEngine.LoadBank("Master");
 
-	// Create an event instance
-	AudioEvent* testEvent = AudioEngine::Instance().CreateEvent("Mii Channel Theme", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}");
+	// Create a music event instance									 // Right-click your event in fmod Studio -> Copy GUID
+	AudioEvent& music = AudioEngine::Instance().CreateEvent("UniqueName", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}");
 
-	// Play the event
-	testEvent->Play();
-
-	// Parameter change
-	testEvent->SetParameter("Underwater", 1);
-
-
+	// Play the music event
+	music.Play();
 
 }
 
 //------------------------------------------------------------------------
-// Update your game here. deltaTime is the elapsed time since the last update in ms.
-// This will be called at no greater frequency than the value of APP_MAX_FRAME_RATE
+// Update your game here. 
 //------------------------------------------------------------------------
 void Update(float deltaTime)
 {
-	// Update fmod
-	AudioEngine::Instance().Update();
+
+	// Increment game time
+	gameTime += deltaTime;
+
+	// Get a ref to the engine
+	AudioEngine& audioEngine = AudioEngine::Instance();
+
+	// Get a ref to the music event
+	AudioEvent& music = audioEngine.GetEvent("UniqueName");
 	
+	// After 5 seconds go underwater
+	if (gameTime > 4.0f)
+	{
+		music.SetParameter("Underwater", 1);
+	}
+
+	// After 10 second slow down
+	if (gameTime > 10.0f)
+	{
+		audioEngine.SetGlobalParameter("Timewarp", 0);
+	}
+
+
+	// Update fmod
+	audioEngine.Update();
+
 }
 
 
 //------------------------------------------------------------------------
-// Add your display calls here (DrawLine, Print, DrawSprite.) 
+// Add your display calls here
 //------------------------------------------------------------------------
 void Render()
 {
-
+	// Who needs graphics when you have audio?
 }
 
 
