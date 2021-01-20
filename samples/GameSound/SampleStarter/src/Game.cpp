@@ -27,7 +27,6 @@ void Init()
 
 	// Play the music event
 	music.Play();
-
 }
 
 //------------------------------------------------------------------------
@@ -44,17 +43,22 @@ void Update(float deltaTime)
 
 	// Get a ref to the music event
 	AudioEvent& music = audioEngine.GetEvent("UniqueName");
+
+	// Get listener
+	AudioListener& listener = audioEngine.GetListener();
+	
 	
 	// After 5 seconds go underwater
 	if (gameTime > 4.0f)
 	{
-		music.SetParameter("Underwater", 1);
+		music.SetPosition(glm::vec3(10, 0, 0));
 	}
 
 	// After 10 second slow down
 	if (gameTime > 10.0f)
 	{
 		audioEngine.SetGlobalParameter("Timewarp", 0);
+		music.SetParameter("Underwater", 1);
 	}
 
 

@@ -13,8 +13,71 @@
 
 #include <glm/glm.hpp>
 
+class AudioObject // Has helpers for audio classes
+{
 
-class AudioEvent
+public:
+	virtual ~AudioObject() {}
+
+protected:
+
+	int ErrorCheck(FMOD_RESULT result);
+
+	float dbToVolume(float db);
+	float VolumeTodb(float volume);
+	FMOD_VECTOR VectorToFmod(const glm::vec3& vec);
+	glm::vec3 FmodToVector(const FMOD_VECTOR& vec);
+
+};
+
+
+class AudioListener : public AudioObject
+{
+	friend class AudioEngine;
+
+public:
+
+	void SetPosition(const glm::vec3& pos);
+	glm::vec3 GetPosition();
+
+
+	// Vel not working
+	void SetVelocity(const glm::vec3& vel);
+	glm::vec3 GetVelocity();
+
+
+	// TODO: Test these
+	void SetForward(const glm::vec3& forward);
+	glm::vec3 GetForward();
+	void SetUp(const glm::vec3& up);
+	glm::vec3 GetUp();
+
+
+private:
+
+	// Only AudioEngine can create a listener
+	// Get a ref from AudioEngine::GetListener()
+	AudioListener() {}
+	AudioListener(AudioListener const&) = delete;
+	void operator=(AudioListener const&) = delete;
+
+private:
+
+	// Ref to the FMOD System
+	FMOD::Studio::System* m_StudioSystem;
+
+	// Save the most recent changes
+	FMOD_3D_ATTRIBUTES m_Attributes;
+	FMOD_VECTOR m_AttenuationPosition;
+
+	// Basic ID, first listener is 0
+	int m_ID;
+	void SetID(const int& id);
+
+};
+
+
+class AudioEvent : public AudioObject
 {
 	friend class AudioEngine;
 
@@ -41,6 +104,9 @@ public:
 	void SetParameter(const char* name, const float& value, const bool& ignoreSeekSpeed = false);
 	float GetParameterValue(const char* name);
 
+	void SetPosition(const glm::vec3& pos);
+	glm::vec3 GetPosition();
+
 
 private:
 
@@ -50,15 +116,15 @@ private:
 	// Don't want copies, should only grab refs from audio engine
 	AudioEvent(AudioEvent const&) = delete;
 
-	int ErrorCheck(FMOD_RESULT result);
-
 private:
+
+	FMOD_3D_ATTRIBUTES m_Attributes;
 
 	FMOD::Studio::EventInstance* m_EventInstance;
 };
 
 
-class AudioEngine
+class AudioEngine : public AudioObject
 {
 	friend class AudioEvent;
 
@@ -77,10 +143,11 @@ public:
 	void Update();
 	void Shutdown();
 
-
-
 	//// Banks ////
 	void LoadBank(const std::string& strBankName, FMOD_STUDIO_LOAD_BANK_FLAGS flags = FMOD_STUDIO_LOAD_BANK_NORMAL);
+
+	//// Listener ////
+	AudioListener& GetListener();
 
 	//// Events ////
 	AudioEvent& CreateEvent(const std::string& strEventName, const std::string& strEventNumber);
@@ -90,28 +157,27 @@ public:
 	void SetGlobalParameter(const char* name, const float& value, const bool& ignoreSeekSpeed = false);
 	float GetGlobalParameterValue(const char* name);
 
-	//// Helpers ////
-	float dbToVolume(float db);
-	float VolumeTodb(float volume);
-	FMOD_VECTOR VectorToFmod(const glm::vec3& vPosition);
+	//// Bus ////
+
 
 
 private:
 
 	AudioEngine() {}
 
-	int ErrorCheck(FMOD_RESULT result);
-
 private:
+	
+	// FMOD Systems
 	FMOD::Studio::System* m_StudioSystem;
 	FMOD::System* m_System;
+	
+	// Listener
+	AudioListener m_Listener;
 
-
-	int m_ChannelIDProvider;
-	std::map<int, FMOD::Channel*> m_ChannelMap;
+	// Banks
 	std::map<std::string, FMOD::Studio::Bank*> m_BankMap;
 
-	// Holds our event class
+	// Events
 	std::map<std::string, AudioEvent*> m_EventMap;
 
 };
