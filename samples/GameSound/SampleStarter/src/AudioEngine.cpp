@@ -52,6 +52,24 @@ int AudioObject::ErrorCheck(FMOD_RESULT result)
 	return 0;
 }
 
+////////////////////////////////////
+//			 AudioBus   		  //
+////////////////////////////////////
+
+AudioBus::AudioBus(FMOD::Studio::Bus* bus)
+	: m_Bus(bus)
+{
+}
+
+
+
+// Get and Set Paused
+
+// Get and Set Volume
+
+// 
+
+
 
 ////////////////////////////////////
 //			 AudioListener		  //
@@ -277,16 +295,16 @@ void AudioEngine::Init()
 	// Save ref to core system
 	ErrorCheck(m_StudioSystem->getCoreSystem(&m_System));
 
-	// Setup listener
+	// Set one listener, makes its ID 0
 	ErrorCheck(m_StudioSystem->setNumListeners(1));
 	m_Listener.SetID(0);
 	m_Listener.m_StudioSystem = m_StudioSystem;
 	
+	// Get the attributes
 	ErrorCheck(
 		m_StudioSystem->getListenerAttributes(0, 
 			&m_Listener.m_Attributes, 
 			&m_Listener.m_AttenuationPosition));
-	
 
 }
 
@@ -299,13 +317,19 @@ void AudioEngine::Update()
 
 void AudioEngine::Shutdown()
 {
-
 	// Delete events
 	for (auto event : m_EventMap)
 	{
 		delete event.second;
 	}
 	m_EventMap.clear();
+
+	// Delete busses
+	for (auto bus : m_BusMap)
+	{
+		delete bus.second;
+	}
+	m_BusMap.clear();
 
 	AudioEngine::ErrorCheck(m_StudioSystem->unloadAll());
 	AudioEngine::ErrorCheck(m_StudioSystem->release());
@@ -338,11 +362,11 @@ AudioListener& AudioEngine::GetListener()
 	return m_Listener;
 }
 
-AudioEvent& AudioEngine::CreateEvent(const std::string& eventName, const std::string& eventNumber)
+AudioEvent& AudioEngine::CreateEvent(const std::string& eventName, const std::string& GUID)
 {
 	// Get find event in file
 	FMOD::Studio::EventDescription* eventDescription = NULL;
-	ErrorCheck(m_StudioSystem->getEvent(eventNumber.c_str(), &eventDescription));
+	ErrorCheck(m_StudioSystem->getEvent(GUID.c_str(), &eventDescription));
 
 	// If the event exists
 	if (eventDescription)
@@ -381,7 +405,42 @@ AudioEvent& AudioEngine::GetEvent(const std::string& strEventName)
 		// Event not found
 		__debugbreak;
 	}
+}
 
+void AudioEngine::LoadBus(const std::string& strBusName, const std::string& GUID)
+{
+	// Find the bus in fmod
+	FMOD::Studio::Bus* fmodBus = nullptr;
+	ErrorCheck(m_StudioSystem->getBus(GUID.c_str(), &fmodBus));
+
+	// Make sure we're not adding a duplicate name
+	if (m_BusMap.find(strBusName) != m_BusMap.end())
+	{
+		__debugbreak();
+	}
+
+	// Create an audio event
+	AudioBus* newBus = new AudioBus(fmodBus);
+
+	// Add the bus to our map
+	m_BusMap[strBusName] = newBus;
+
+	// Close your eyes for a bit, you deserve it
+}
+
+AudioBus& AudioEngine::GetBus(const std::string& strBusName)
+{
+	// If the bus exists
+	if (m_BusMap.find(strBusName) != m_BusMap.end())
+	{
+		// Return it
+		return *m_BusMap.at(strBusName);
+	}
+	else
+	{
+		// Bus not found
+		__debugbreak;
+	}
 }
 
 /////// Global Parameters //////////

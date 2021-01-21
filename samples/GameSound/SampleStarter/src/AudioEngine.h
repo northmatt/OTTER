@@ -6,7 +6,7 @@
 
 // Standard Library
 #include <string>
-#include <map>
+#include <unordered_map>
 #include <vector>
 #include <math.h>
 #include <iostream>
@@ -27,6 +27,35 @@ protected:
 	float VolumeTodb(float volume);
 	FMOD_VECTOR VectorToFmod(const glm::vec3& vec);
 	glm::vec3 FmodToVector(const FMOD_VECTOR& vec);
+
+};
+
+class AudioBus : public AudioObject
+{
+	friend class AudioEngine;
+
+public:
+
+	// Get and Set Paused
+
+	// Get and Set Volume
+
+	// Get and Set Mute
+
+	// Stop all events
+
+private:
+
+	// AudioEngine class uses this to create bus objects
+	AudioBus(FMOD::Studio::Bus* bus);
+
+	// Don't want copies, should only grab refs from audio engine
+	AudioBus(AudioBus const&) = delete;
+	void operator=(AudioBus const&) = delete;
+
+private:
+
+	FMOD::Studio::Bus* m_Bus;
 
 };
 
@@ -115,6 +144,7 @@ private:
 
 	// Don't want copies, should only grab refs from audio engine
 	AudioEvent(AudioEvent const&) = delete;
+	void operator=(AudioEvent const&) = delete;
 
 private:
 
@@ -150,7 +180,7 @@ public:
 	AudioListener& GetListener();
 
 	//// Events ////
-	AudioEvent& CreateEvent(const std::string& strEventName, const std::string& strEventNumber);
+	AudioEvent& CreateEvent(const std::string& strEventName, const std::string& GUID);
 	AudioEvent& GetEvent(const std::string& strEventName);
 
 	//// Global Parameters ////
@@ -158,7 +188,8 @@ public:
 	float GetGlobalParameterValue(const char* name);
 
 	//// Bus ////
-
+	void LoadBus(const std::string& strBusName, const std::string& GUID);
+	AudioBus& GetBus(const std::string& strBusName);
 
 
 private:
@@ -175,10 +206,13 @@ private:
 	AudioListener m_Listener;
 
 	// Banks
-	std::map<std::string, FMOD::Studio::Bank*> m_BankMap;
+	std::unordered_map<std::string, FMOD::Studio::Bank*> m_BankMap;
 
 	// Events
-	std::map<std::string, AudioEvent*> m_EventMap;
+	std::unordered_map<std::string, AudioEvent*> m_EventMap;
+
+	// Bus
+	std::unordered_map<std::string, AudioBus*> m_BusMap;
 
 };
 
