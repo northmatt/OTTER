@@ -61,13 +61,53 @@ AudioBus::AudioBus(FMOD::Studio::Bus* bus)
 {
 }
 
+bool AudioBus::CheckPaused()
+{
+	bool paused;
+	ErrorCheck(m_Bus->getPaused(&paused));
+	return paused;
+}
 
+void AudioBus::SetPaused(const bool& pause)
+{
+	ErrorCheck(m_Bus->setPaused(pause));
+}
 
-// Get and Set Paused
+float AudioBus::GetVolume()
+{
+	float volume;
+	ErrorCheck(m_Bus->getVolume(&volume));
+	return volume;
+}
+void AudioBus::SetVolume(const float& newVolume)
+{
+	ErrorCheck(m_Bus->setVolume(newVolume));
+}
 
-// Get and Set Volume
+bool AudioBus::CheckMuted()
+{
+	bool muted;
+	ErrorCheck(m_Bus->getMute(&muted));
+	return muted;
+}
 
-// 
+void AudioBus::SetMute(const bool& mute)
+{
+	ErrorCheck(m_Bus->setMute(mute));
+}
+
+void AudioBus::StopAllEvent(const bool& fade)
+{
+	if (fade)
+	{
+		ErrorCheck(m_Bus->stopAllEvents(FMOD_STUDIO_STOP_ALLOWFADEOUT));
+	}
+	else
+	{
+		ErrorCheck(m_Bus->stopAllEvents(FMOD_STUDIO_STOP_IMMEDIATE));
+	}
+	
+}
 
 
 

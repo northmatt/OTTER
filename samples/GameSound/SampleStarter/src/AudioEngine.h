@@ -37,12 +37,19 @@ class AudioBus : public AudioObject
 public:
 
 	// Get and Set Paused
+	bool CheckPaused();
+	void SetPaused(const bool& pause);
 
 	// Get and Set Volume
+	float GetVolume();
+	void SetVolume(const float& newVolume);
 
 	// Get and Set Mute
+	bool CheckMuted();
+	void SetMute(const bool& mute);
 
 	// Stop all events
+	void StopAllEvent(const bool& fade = false);
 
 private:
 
