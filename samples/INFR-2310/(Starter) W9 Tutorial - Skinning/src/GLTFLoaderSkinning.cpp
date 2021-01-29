@@ -52,6 +52,15 @@ namespace nou::GLTF
 		}
 
 		//Step 4: Extract skin weights.
+		result = ExtractSkinWeights(*gltf, mesh, err, warn);
+
+		if (!result)
+		{
+			DumpErrorsAndWarnings(filename, err, warn);
+			return;
+		}
+
+		DumpErrorsAndWarnings(filename, err, warn);
 	}
 
 	void LoadAnimation(const std::string& filename, SkeletalAnim& anim)

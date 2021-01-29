@@ -22,6 +22,12 @@ Week 9 Tutorial Sample - Created for INFR 2310 at Ontario Tech.
 
 using namespace nou;
 
+struct animStuff {
+	bool play = true;
+	bool loop = true;
+	float speed = 1.f;
+};
+
 int main()
 {
 	App::Init("Week 9 Tutorial - Skinning", 600, 600);
@@ -90,8 +96,9 @@ int main()
 
 	App::Tick();
 
-	while (!App::IsClosing() && !Input::GetKey(GLFW_KEY_ESCAPE))
-	{
+	animStuff theThing;
+	bool panelOpen = true;
+	while (!App::IsClosing() && !Input::GetKey(GLFW_KEY_ESCAPE)) {
 		App::FrameStart();
 
 		float deltaTime = App::GetDeltaTime();
@@ -117,8 +124,7 @@ int main()
 
 		const Skeleton& skeleton = boiEntity.Get<CSkinnedMeshRenderer>().GetSkeleton();
 
-		for (auto& joint : skeleton.m_joints)
-		{
+		for (auto& joint : skeleton.m_joints) {
 			glm::decompose(joint.m_global,
 						   scale,
 						   jointTransform.m_rotation,
@@ -133,10 +139,29 @@ int main()
 		glEnable(GL_DEPTH_TEST);
 
 		App::StartImgui();
-
 		//Put any ImGUI code you need in here.
 		//(Don't forget to call Imgui::Begin and Imgui::End!)
+		ImGui::Begin("GUI", &panelOpen, ImVec2(370, 150));
 
+		if (ImGui::Button((theThing.play) ? "Pause" : "Play")) {
+			theThing.play = !theThing.play;
+			boiEntity.Get<CAnimator>().SetIsPlaying(theThing.play);
+		}	
+
+		if (ImGui::Button((theThing.loop) ? "is looping" : "no Loop")) {
+			theThing.loop = !theThing.loop;
+			boiEntity.Get<CAnimator>().SetIsLooping(theThing.loop);
+		}
+
+		if (ImGui::Button("Reset anim time")) {
+			boiEntity.Get<CAnimator>().resetDuration();
+		}
+
+		if (ImGui::DragFloat("Speed Multiplier", &theThing.speed, 0.1f, 0.f, 4.f)) {
+			boiEntity.Get<CAnimator>().SetSpeedMultiplier(theThing.speed);
+		}
+
+		ImGui::End();
 		App::EndImgui();
 
 		App::SwapBuffers();

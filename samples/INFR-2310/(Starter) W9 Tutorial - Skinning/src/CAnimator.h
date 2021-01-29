@@ -28,6 +28,12 @@ namespace nou
 		SkeletalAnimClip* GetClip();
 
 		void Update(float deltaTime);
+		void resetDuration();
+		bool GetIsPlaying();
+		void SetIsPlaying(bool playing);
+		bool GetIsLooping();
+		void SetIsLooping(bool looping);
+		void SetSpeedMultiplier(float speed);
 
 		protected:
 

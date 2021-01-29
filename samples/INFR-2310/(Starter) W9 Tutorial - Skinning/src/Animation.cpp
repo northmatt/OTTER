@@ -28,16 +28,16 @@ namespace nou
 		rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 	}
 
-	SkeletalAnimClip::SkeletalAnimClip(const SkeletalAnim& anim, const Skeleton& skeleton)
-		: m_anim(anim)
-	{
+	SkeletalAnimClip::SkeletalAnimClip(const SkeletalAnim& anim, const Skeleton& skeleton) : m_anim(anim) {
+		m_playing = true;
+		m_loop = true;
+		m_speedMultiplier = 1.0f;
 		m_timer = 0.0f;
 
 		//Should have output for each joint in our skeleton.
 		m_result.resize(skeleton.m_joints.size());
 
-		for (size_t i = 0; i < skeleton.m_joints.size(); ++i)
-		{
+		for (size_t i = 0; i < skeleton.m_joints.size(); ++i) {
 			//Output should default to the base pose of our skeleton.
 			m_result[i].pos = skeleton.m_joints[i].m_basePos;
 			m_result[i].rotation = skeleton.m_joints[i].m_baseRotation;
@@ -53,6 +53,27 @@ namespace nou
 	void SkeletalAnimClip::Update(float deltaTime, const Skeleton& skeleton)
 	{
 		//TODO: Complete this function.
+		if (m_anim.duration != 0.0f) {
+			if (m_playing)
+				m_timer += deltaTime * m_speedMultiplier;
+
+			if (m_timer > m_anim.duration) {
+				if (m_loop) {
+					std::fill(m_rotFrame.begin(), m_rotFrame.end(), 0);
+					std::fill(m_posFrame.begin(), m_posFrame.end(), 0);
+
+					while (m_timer > m_anim.duration)
+						m_timer -= m_anim.duration;
+				}
+				else {
+					m_timer = m_anim.duration;
+					//m_playing = false;
+				}
+			}
+		}
+
+		UpdateRotations();
+		UpdatePositions();
 	}
 
 	void SkeletalAnimClip::Apply(Skeleton& skeleton)
@@ -64,6 +85,33 @@ namespace nou
 			joint.m_pos = m_result[i].pos;
 			joint.m_rotation = m_result[i].rotation;
 		}
+	}
+
+	void SkeletalAnimClip::resetDuration() {
+		m_timer = 0;
+
+		std::fill(m_rotFrame.begin(), m_rotFrame.end(), 0);
+		std::fill(m_posFrame.begin(), m_posFrame.end(), 0);
+	}
+
+	bool SkeletalAnimClip::GetIsPlaying() {
+		return m_playing;
+	}
+
+	void SkeletalAnimClip::SetIsPlaying(bool playing) {
+		m_playing = playing;
+	}
+
+	bool SkeletalAnimClip::GetIsLooping() {
+		return m_loop;
+	}
+
+	void SkeletalAnimClip::SetIsLooping(bool looping) {
+		m_loop = looping;
+	}
+
+	void SkeletalAnimClip::SetSpeedMultiplier(float speed) {
+		m_speedMultiplier = speed;
 	}
 
 	void SkeletalAnimClip::UpdatePositions()
@@ -88,9 +136,7 @@ namespace nou
 			//that our animation's last frame is the same as its
 			//first (a perfect loop) - this may or may not
 			//be the case depending on how you manage your own animation work.
-			while (m_timer > m_anim.data[i].posTimes[m_posFrame[i] 
-				   + static_cast<size_t>(1)]
-				   && m_posFrame[i] < m_anim.data[i].posFrames - 2)
+			while (m_timer > m_anim.data[i].posTimes[m_posFrame[i] + static_cast<size_t>(1)] && m_posFrame[i] < m_anim.data[i].posFrames - 2)
 			{
 				++m_posFrame[i];
 			}

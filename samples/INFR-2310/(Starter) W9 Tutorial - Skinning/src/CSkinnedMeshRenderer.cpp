@@ -44,6 +44,9 @@ namespace nou
 	void CSkinnedMeshRenderer::UpdateJointMatrices()
 	{
 		//TODO: Complete this function.
+		for (size_t i = 0; i < m_skeleton->m_joints.size(); ++i) {
+			m_jointMatrices->data[i] = m_skeleton->m_joints[i].m_global * m_skeleton->m_joints[i].m_invBind;
+		}
 	}
 
 	void CSkinnedMeshRenderer::SetMesh(const SkinnedMesh& mesh)
@@ -79,6 +82,7 @@ namespace nou
 		ShaderProgram::Current()->SetUniform("model", transform.GetGlobal());
 		ShaderProgram::Current()->SetUniform("normal", transform.GetNormal());
 		//TODO: What else do we need to do here?
+		ShaderProgram::Current()->SetUniformArray("jointMatrices", m_jointMatrices->data, MAX_NUM_JOINTS);
 
 		m_vao->Draw();
 	}

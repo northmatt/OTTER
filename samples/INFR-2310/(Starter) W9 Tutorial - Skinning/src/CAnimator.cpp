@@ -37,4 +37,22 @@ namespace nou
 		skeleton.DoFK();
 		rend.UpdateJointMatrices();
 	}
+	void CAnimator::resetDuration() {
+		m_clip->resetDuration();
+	}
+	bool CAnimator::GetIsPlaying() {
+		return m_clip->GetIsPlaying();
+	}
+	void CAnimator::SetIsPlaying(bool playing) {
+		m_clip->SetIsPlaying(playing);
+	}
+	bool CAnimator::GetIsLooping() {
+		return m_clip->GetIsLooping();
+	}
+	void CAnimator::SetIsLooping(bool looping) {
+		m_clip->SetIsLooping(looping);
+	}
+	void CAnimator::SetSpeedMultiplier(float speed) {
+		m_clip->SetSpeedMultiplier(speed);
+	}
 }
